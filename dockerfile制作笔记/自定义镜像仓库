@@ -1,0 +1,31 @@
+自定义镜像仓库 - 相当于yum源
+先在/etc/docker下面touch一个文件daemon,并进去写文件,如下:
+
+{
+  "insecure-registries" : [192.168.1.88:5000]  
+}
+	#前面是固定格式.后面ip写数组机的ip及端口,如果忘了前面的格式,可以使用man dockerd 查询 json格式!
+        #c/s 两端都要写这样的文件,一模一样
+
+启动:
+   docker run -itd -p 5000:5000 registry  
+                     #在命令行上敲,别忘了加d
+
+使用: 
+  docker tag busybox:latest 192.168.1.88:5000/busybox:latest
+	#先打标记,后面跟上私有仓库的地址及镜像
+
+  docker push 192.168.1.88:5000/busybox:latest
+	#上传镜像到私有仓库,后面跟上私有仓库地址及镜像
+
+测试:
+  在别的数组机上测试:
+    docker run -it 192.168.1.88:5000/busybox:latest 
+      #和原来的一样,只要后面跟上私有地址的地址和指定的镜像及标签
+
+显示所有镜像:
+   curl http:192.168.1.88:5000/v2/_catalog
+     #前面写私有仓库ip及端口 后面固定格式
+显示镜像的所有标签
+    curl http://192.168.1.88:5000/v2/myos/tags/list
+					#myos此处是镜像的名字
