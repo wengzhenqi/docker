@@ -1,0 +1,32 @@
+dockerfile语法格式:
+      FROM:        基础镜像(就是在什么镜像上面做)
+      MAINTAINER:   镜像创建者信息(作者的信息)
+      EXPOSE:      开放的端口
+      ENV:         设置变量
+      ADD:         复制文件到镜像(从数组机里把文件塞到docker容器里)
+      RUN:         制作镜像时执行的命令,可以有多个
+      WORKDIR:     定义容器默认工作目录
+      CMD:         容器启动时执行的命令,仅可以有一条CMD(要在方括号里面有参数以逗号分隔)
+      
+步骤: 
+       先随便创建一个文件夹,然后在里面touch一个叫Dockerfile的文件(注意: 文件名一定要叫Dockerfile),然后在Dockerfile文件里编辑(注意开头一定要大写!!!) 如下:
+
+
+FROM centos:latest	#基于什么镜像做
+RUN  rm -f /etc/yum.repos.d/*.repo	
+ADD  local.repo /etc/yum.repos.d/local.repo   #把数组机的文						   件塞到容器里
+RUN  yum -y install net-tools vim bash-comletion psmisc
+			#装软件加-y避免交互
+:wq
+
+docker build -t testos:latest . 
+#在命令行上敲,制作,-t 指定叫什么名字,后面的点代表当前目录,提前把要塞进去的文件复制到自己的这个目录里
+
+		#交互式容器不要加d  服务容器一定要加d !!!
+制作sshd版dockerfile:
+   FROM myos:latest
+   RUN  yum -y install openssh-server-7.4p1-11.el7.x86_64 initscripts-9.49.39-1.el7.x86_64
+   RUN  sshd-keygen && echo 'aa' | passwd --stdin root
+   ENV  EnvironmentFile=/etc/sysconfig/sshd
+   EXPOSE 22
+   CMD  ["/usr/sbin/sshd", "-D"]
